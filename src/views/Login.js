@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ReCAPTCHA from "react-google-recaptcha";
 import { Container, Paper, Typography, TextField, Dialog, DialogTitle, DialogContent, DialogActions } from '@material-ui/core';
 import { makeStyles } from '@mui/styles';
 import fondo from '../assets/images/fondogallos.png';
@@ -66,7 +67,12 @@ const Login = ({ open, onClose }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [recaptchaValue, setRecaptchaValue] = useState(null);
   const classes = useStyles();
+
+  const handleRecaptchaChange = (value) => {
+    setRecaptchaValue(value);
+  };
 
   const handleClickShowPassword = () => setShowPassword(!showPassword);
   const handleMouseDownPassword = (event) => event.preventDefault();
@@ -88,6 +94,10 @@ const Login = ({ open, onClose }) => {
   };
 
   const handleLogin = async () => {
+    if (!recaptchaValue) {
+      alert("Por favor, verifica que no eres un robot.");
+      return;
+    }
     try {
       const tokenObtained = await BuscarToken();
       if (!tokenObtained || !cookies.get('token')) {
@@ -200,6 +210,12 @@ const Login = ({ open, onClose }) => {
                         }}
                       />
                     </Grid>
+                    <Grid item xs={12} style={{ display: 'flex', justifyContent: 'center' }}>
+                      <ReCAPTCHA
+                        sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI" // Test key, replace with your actual key
+                        onChange={handleRecaptchaChange}
+                      />
+                    </Grid>
                     <Grid item xs={12}>
                       <Button
                         fullWidth
@@ -214,6 +230,7 @@ const Login = ({ open, onClose }) => {
                           },
                         }}
                         onClick={handleLogin}
+                        disabled={!recaptchaValue}
                       >
                         Ingresar
                       </Button>
